@@ -8,27 +8,50 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppController = void 0;
 const common_1 = require("@nestjs/common");
-const app_service_1 = require("./app.service");
+const prisma_service_1 = require("./infra/prisma.service");
+const crypto_1 = require("crypto");
+const create_notification_body_1 = require("./infra/create-notification-body");
 let AppController = class AppController {
-    constructor(appService) {
-        this.appService = appService;
+    constructor(prisma) {
+        this.prisma = prisma;
     }
-    getHello() {
-        return this.appService.getHello();
+    list() {
+        return this.prisma.notification.findMany();
+    }
+    async create(body) {
+        const { recipientId, content, category } = body;
+        await this.prisma.notification.create({
+            data: {
+                id: (0, crypto_1.randomUUID)(),
+                content,
+                category,
+                recipientId
+            }
+        });
     }
 };
 __decorate([
     (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", String)
-], AppController.prototype, "getHello", null);
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "list", null);
+__decorate([
+    (0, common_1.Post)(),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [create_notification_body_1.CreateNotificationBody]),
+    __metadata("design:returntype", Promise)
+], AppController.prototype, "create", null);
 AppController = __decorate([
-    (0, common_1.Controller)(),
-    __metadata("design:paramtypes", [app_service_1.AppService])
+    (0, common_1.Controller)('notifications'),
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
 ], AppController);
 exports.AppController = AppController;
 //# sourceMappingURL=app.controller.js.map
